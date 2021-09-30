@@ -11,11 +11,12 @@ class OrderProduct(
     @JoinColumn(name = "orderId", referencedColumnName = "id")
     var order: Order,
 
-    var warehouse: Long,                    // warehouseId products are picked from
 
-    var purchasedProduct: Long,             // productId of purchased product
+    var purchasedProductId: Long,             // productId of purchased product
 
     var amount: Long,
 
-    var purchasedProductPrice: BigDecimal   // Product(productId)'s price
+    var purchasedProductPrice: BigDecimal,   // Product(productId)'s price
+
+    var warehouseId: Long                    // warehouseId products are picked from
 ): EntityBase<Long>()
