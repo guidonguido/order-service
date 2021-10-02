@@ -11,7 +11,6 @@ class OrderProduct(
     @JoinColumn(name = "orderId", referencedColumnName = "id")
     var order: Order,
 
-
     var purchasedProductId: Long,             // productId of purchased product
 
     var amount: Long,
