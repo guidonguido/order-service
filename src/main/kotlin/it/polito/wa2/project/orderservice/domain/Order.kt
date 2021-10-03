@@ -9,9 +9,6 @@ import javax.persistence.OneToMany
 class Order(
     var buyerId: Long,                                    // Order creator userId
 
-    @OneToMany(mappedBy = "order", targetEntity = OrderProduct::class)
-    var orderProducts: Set<OrderProduct> = setOf(),      // List of purchased products, their amount, the purchase price
-                                                        // It embeds infos about the warehouse products are picked from
 
     // TODO create Address Entity or keep this way
     var deliveryName: String,
@@ -21,6 +18,10 @@ class Order(
     var deliveryNumber: String,
 
     @Enumerated(EnumType.STRING)
-    var status: OrderStatus
+    var status: OrderStatus,
 
+    @OneToMany(mappedBy = "order", targetEntity = OrderProduct::class)
+    var orderProducts: MutableSet<OrderProduct> = mutableSetOf()
+                                                            // List of purchased products, their amount, the purchase price
+                                                            // It embeds infos about the warehouse products are picked from
 ): EntityBase<Long>()
