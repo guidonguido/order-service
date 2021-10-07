@@ -47,6 +47,11 @@ class OrderController( val orderService: OrderService ){
     ): ResponseEntity<OrderDTO> {
         val newOrderDTO = orderService.addOrder(orderDTO)
 
+        /* TODO
+         * Use NotificationService to send an email to ADMINs and USERs
+         * about the order status
+         */
+
         return ResponseEntity(orderDTO, HttpStatus.OK)
     }
 
@@ -63,6 +68,11 @@ class OrderController( val orderService: OrderService ){
     ): ResponseEntity<OrderDTO>{
         val updatedOrderDTO = orderService.updateOrder(orderId, status)
 
+        /* TODO
+         * Use NotificationService to send an email to ADMINs and USERs
+         * about the updated order status
+         */
+
         return ResponseEntity(updatedOrderDTO, HttpStatus.OK)
     }
 
@@ -72,6 +82,11 @@ class OrderController( val orderService: OrderService ){
         orderId: Long
     ): ResponseEntity<OrderDTO> {
         val deletedOrderDTO = orderService.deleteOrder(orderId)
+
+        /* TODO
+         * Use NotificationService to send an email to ADMINs and USERs
+         * about the updated order status
+         */
 
         return ResponseEntity(deletedOrderDTO, HttpStatus.OK)
     }
