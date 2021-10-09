@@ -6,7 +6,7 @@ import it.polito.wa2.project.orderservice.domain.OrderStatus
 import it.polito.wa2.project.orderservice.dto.OrderDTO
 import it.polito.wa2.project.orderservice.dto.toOrderDTO
 import it.polito.wa2.project.orderservice.repositories.OrderRepository
-import javassist.NotFoundException
+import it.polito.wa2.project.orderservice.exceptions.NotFoundException
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 
@@ -32,34 +32,32 @@ class OrderServiceImpl( private val orderRepository: OrderRepository): OrderServ
 
         val newOrder =
             Order(order.buyerId,
-                  order.deliveryName,
-                  order.deliveryStreet,
-                  order.deliveryZip,
-                  order.deliveryCity,
-                  order.deliveryNumber,
-                  order.status)
+                order.deliveryName,
+                order.deliveryStreet,
+                order.deliveryZip,
+                order.deliveryCity,
+                order.deliveryNumber,
+                order.status)
 
-        val newOrderProducts = order.orderProducts.map{ OrderProduct(newOrder,
-                                                                     it.purchasedProductId,
-                                                                     it.amount,
-                                                                     it.purchasedProductPrice,
-                                                                     it.warehouseId )}.toMutableSet()
+        order.orderProducts.forEach{
+            newOrder.addOrderProduct( OrderProduct(null,
+                it.purchasedProductId,
+                it.amount,
+                it.purchasedProductPrice,
+                it.warehouseId ))}
 
-        newOrder.orderProducts = newOrderProducts
-
-        return orderRepository.saveAndFlush(newOrder).toOrderDTO()
+        return orderRepository.save(newOrder).toOrderDTO()
     }
 
     override fun updateOrder(orderId: Long, status: OrderStatus): OrderDTO {
         val order = orderRepository.findById(orderId)
 
-        if (order.isEmpty) throw NotFoundException("[OrderService Exception] Selected orderId does not exist, no update is possible")
+        if (order.isEmpty) throw NotFoundException("[OrderService Exception] Selected orderId does not exist")
 
         var updatedOrder = order.get()
         updatedOrder.status = status
 
-        return orderRepository.save(updatedOrder).toOrderDTO()
-
+        return  orderRepository.save(updatedOrder).toOrderDTO()
     }
 
     override fun deleteOrder(orderId: Long): OrderDTO {

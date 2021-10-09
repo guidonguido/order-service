@@ -6,7 +6,7 @@ import java.math.BigDecimal
 data class OrderProductDTO(
     var purchasedProductId: Long,             // productId of purchased product
     var amount: Long,
-    var purchasedProductPrice: BigDecimal,   // Product(productId)'s price
+    var purchasedProductPrice: Double,   // Product(productId)'s price
     var warehouseId: Long                    // warehouseId products are picked from
 )
 

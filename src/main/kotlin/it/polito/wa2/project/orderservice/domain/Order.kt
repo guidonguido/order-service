@@ -1,11 +1,9 @@
 package it.polito.wa2.project.orderservice.domain
 
-import javax.persistence.Entity
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.OneToMany
+import javax.persistence.*
 
 @Entity
+@Table(name = "ORDERS")
 class Order(
     var buyerId: Long,                                    // Order creator userId
 
@@ -20,8 +18,17 @@ class Order(
     @Enumerated(EnumType.STRING)
     var status: OrderStatus,
 
-    @OneToMany(mappedBy = "order", targetEntity = OrderProduct::class)
+    // TODO add CascadeType
+    @OneToMany(mappedBy = "order",
+        cascade = arrayOf(CascadeType.ALL), // Persist, Delete, Merge... OrderProduct(s) when same operation is executed via Order object
+        targetEntity = OrderProduct::class)
     var orderProducts: MutableSet<OrderProduct> = mutableSetOf()
                                                             // List of purchased products, their amount, the purchase price
                                                             // It embeds infos about the warehouse products are picked from
-): EntityBase<Long>()
+): EntityBase<Long>() {
+
+    fun addOrderProduct( orderProduct: OrderProduct ){
+        orderProducts.add(orderProduct)
+        orderProduct.order = this
+    }
+}
