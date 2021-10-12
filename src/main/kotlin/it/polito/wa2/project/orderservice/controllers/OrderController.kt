@@ -17,8 +17,15 @@ import javax.validation.constraints.Positive
 class OrderController( val orderService: OrderService ){
 
     @GetMapping()
-    fun getOrders(): ResponseEntity<Set<OrderDTO>> {
-        val orderDTOs = orderService.getOrders()
+    fun getOrders(
+        @RequestParam
+        buyerId: Long? = null
+    ): ResponseEntity<Set<OrderDTO>> {
+
+        var orderDTOs: Set<OrderDTO> = setOf()
+
+        buyerId?.let { orderDTOs = orderService.getBuyerOrders(it)} ?:
+            kotlin.run { orderDTOs = orderService.getOrders() }
 
         return ResponseEntity(orderDTOs, HttpStatus.OK)
     }
@@ -31,18 +38,6 @@ class OrderController( val orderService: OrderService ){
         val orderDTO = orderService.getOrder(orderId)
 
         return ResponseEntity(orderDTO, HttpStatus.OK)
-    }
-
-    @GetMapping("/buyer")
-    fun getBuyerOrders(
-        @RequestParam
-        @NotNull(message = "'from' timestamp is required")
-        @Positive(message = "Insert a valid 'from' timestamp")
-        id: Long? = null,
-    ): ResponseEntity<Set<OrderDTO>>{
-        val orderDTOs = orderService.getBuyerOrders(id!!)
-
-        return ResponseEntity(orderDTOs, HttpStatus.OK)
     }
 
     @PostMapping()
