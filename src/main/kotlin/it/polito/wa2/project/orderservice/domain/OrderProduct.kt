@@ -9,11 +9,7 @@ class OrderProduct(
 
     // TODO add CascadeType
     @ManyToOne
-    @JoinColumn(name = "order_id", referencedColumnName = "id",
-                insertable = false,
-                updatable = false,
-                nullable = false
-                )
+    @JoinColumn(name = "order_id", referencedColumnName = "id")
     var order: Order?,
 
     var purchasedProductId: Long,             // productId of purchased product
