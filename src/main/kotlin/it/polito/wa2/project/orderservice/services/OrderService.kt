@@ -17,4 +17,6 @@ interface OrderService {
 
     fun deleteOrder(orderId: Long): OrderDTO
 
+    fun deteteBuyerOrder(orderId: Long, buyerId: Long): OrderDTO
+
 }

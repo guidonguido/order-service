@@ -100,9 +100,16 @@ class OrderController( val orderService: OrderService ){
     @DeleteMapping("/{orderId}")
     fun deleteOrder(
         @PathVariable
-        orderId: Long
+        orderId: Long,
+
+        @RequestParam
+        buyerId: Long? = null
     ): ResponseEntity<OrderDTO> {
-        val deletedOrderDTO = orderService.deleteOrder(orderId)
+
+        var deletedOrderDTO: OrderDTO? = null
+
+        buyerId?.let { deletedOrderDTO = orderService.deteteBuyerOrder(orderId, it)} ?:
+        kotlin.run { deletedOrderDTO = orderService.deleteOrder(orderId) }
 
         /* TODO
          * Use NotificationService to send an email to ADMINs and USERs

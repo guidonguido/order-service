@@ -71,4 +71,16 @@ class OrderServiceImpl( private val orderRepository: OrderRepository): OrderServ
         return deletedOrder.toOrderDTO()
     }
 
+    override fun deteteBuyerOrder(buyerId: Long, orderId: Long): OrderDTO {
+        val order = orderRepository.findById(orderId)
+
+        if (order.isEmpty) throw NotFoundException("[OrderService Exception] Selected orderId does not exist, no deletion is possible")
+        if (order.get().buyerId != buyerId) throw NotFoundException("[OrderService Exception] Selected orderId does not belongs to selected buyer, no deletion is possible")
+
+        val deletedOrder = order.get()
+        orderRepository.delete(deletedOrder)
+
+        return deletedOrder.toOrderDTO()
+    }
+
 }
