@@ -108,7 +108,7 @@ class OrderController( val orderService: OrderService ){
 
         var deletedOrderDTO: OrderDTO? = null
 
-        buyerId?.let { deletedOrderDTO = orderService.deteteBuyerOrder(orderId, it)} ?:
+        buyerId?.let { deletedOrderDTO = orderService.deleteBuyerOrder(orderId, it)} ?:
         kotlin.run { deletedOrderDTO = orderService.deleteOrder(orderId) }
 
         /* TODO

@@ -33,8 +33,19 @@ dependencies {
 
     implementation("javax.validation:validation-api")
 
-    runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
+    // runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
+    runtimeOnly("mysql:mysql-connector-java")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    // KAFKA
+    implementation("org.springframework.kafka:spring-kafka:2.7.8")
+
+    // DEBEZIUM
+    // https://mvnrepository.com/artifact/io.debezium/debezium-api
+    implementation ("io.debezium:debezium-api:1.7.1.Final")
+    implementation("io.debezium:debezium-embedded:1.7.1.Final")
+    implementation("io.debezium:debezium-connector-mysql:1.7.1.Final")
+
 }
 
 tasks.withType<KotlinCompile> {
