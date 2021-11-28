@@ -33,19 +33,7 @@ dependencies {
 
     implementation("javax.validation:validation-api")
 
-    // DB DRIVER
-    // runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
-    // runtimeOnly("org.postgresql:postgresql")
-    runtimeOnly ("mysql:mysql-connector-java")
-
-    // KAFKA
-    implementation("org.springframework.kafka:spring-kafka:2.7.8")
-
-    // DEBEZIUM
-    implementation("io.debezium:debezium-api:1.7.0.Final")
-    implementation("io.debezium:debezium-embedded:1.7.0.Final")
-    implementation("io.debezium:debezium-connector-mysql:1.7.0.Final")
-
+    runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 

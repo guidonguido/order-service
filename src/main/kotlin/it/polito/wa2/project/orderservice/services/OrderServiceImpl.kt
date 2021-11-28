@@ -7,21 +7,12 @@ import it.polito.wa2.project.orderservice.dto.OrderDTO
 import it.polito.wa2.project.orderservice.dto.toOrderDTO
 import it.polito.wa2.project.orderservice.repositories.OrderRepository
 import it.polito.wa2.project.orderservice.exceptions.NotFoundException
-import it.polito.wa2project.wa2projectcatalogservice.dto.OrderRequestDTO
-import it.polito.wa2project.wa2projectcatalogservice.dto.OrderResponseDTO
-import org.springframework.kafka.core.KafkaTemplate
-import org.springframework.kafka.support.SendResult
 import org.springframework.stereotype.Service
-import org.springframework.util.concurrent.ListenableFuture
-import org.springframework.util.concurrent.ListenableFutureCallback
 import javax.transaction.Transactional
 
 @Service
 @Transactional
-class OrderServiceImpl( private val orderRepository: OrderRepository,
-                        val kafkaTemplateOrderResponse: KafkaTemplate<String, OrderResponseDTO>,
-                        val kafkaTemplateOrderSagaError: KafkaTemplate<String, OrderRequestDTO>
-): OrderService {
+class OrderServiceImpl( private val orderRepository: OrderRepository): OrderService {
 
     override fun getOrders(): Set<OrderDTO> =
         orderRepository.findAll().map { it.toOrderDTO() }.toSet()
@@ -51,7 +42,7 @@ class OrderServiceImpl( private val orderRepository: OrderRepository,
         order.orderProducts.forEach{
             newOrder.addOrderProduct( OrderProduct(null,
                 it.purchasedProductId,
-                it.quantity,
+                it.amount,
                 it.purchasedProductPrice,
                 it.warehouseId ))}
 
@@ -90,36 +81,6 @@ class OrderServiceImpl( private val orderRepository: OrderRepository,
         orderRepository.delete(deletedOrder)
 
         return deletedOrder.toOrderDTO()
-    }
-
-    // Send final Response to CatalogService
-    fun sendKafkaOrderResponse(orderResponseDTO: OrderResponseDTO) {
-
-        val future: ListenableFuture<SendResult<String, OrderResponseDTO>> = kafkaTemplateOrderResponse.send("orderSagaResponse", orderResponseDTO)
-        future.addCallback(object: ListenableFutureCallback<SendResult<String, OrderResponseDTO>> {
-            override fun onSuccess(result: SendResult<String, OrderResponseDTO>?) {
-                println("Sent message OrderResponseDTO")
-            }
-
-            override fun onFailure(ex: Throwable) {
-                println("Unable to send message OrderResponseDTO")
-            }
-        })
-    }
-
-    // Send error notification to WarehouseService
-    fun sendKafkaOrderSagaError(orderRequestDTO: OrderRequestDTO) {
-
-        val future: ListenableFuture<SendResult<String, OrderRequestDTO>> = kafkaTemplateOrderSagaError.send("orderSagaResponse", orderRequestDTO)
-        future.addCallback(object: ListenableFutureCallback<SendResult<String, OrderRequestDTO>> {
-            override fun onSuccess(result: SendResult<String, OrderRequestDTO>?) {
-                println("Sent message orderRequestDTO")
-            }
-
-            override fun onFailure(ex: Throwable) {
-                println("Unable to send message orderRequestDTO")
-            }
-        })
     }
 
 }

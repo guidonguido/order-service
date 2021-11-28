@@ -1,6 +1,5 @@
 package it.polito.wa2.project.orderservice.domain
 
-import java.math.BigInteger
 import javax.persistence.Entity
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
@@ -15,7 +14,7 @@ class OrderProduct(
 
     var purchasedProductId: Long,             // productId of purchased product
 
-    var quantity: BigInteger,
+    var amount: Long,
 
     var purchasedProductPrice: Double,   // Product(productId)'s price
 
