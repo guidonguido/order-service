@@ -9,6 +9,7 @@ import javax.persistence.OneToMany
 class OrderRequest (
 
     // TODO Add OrderRequest UUID
+    var uuid: String,
 
     var orderId: Long?,
     var buyerId: Long?,

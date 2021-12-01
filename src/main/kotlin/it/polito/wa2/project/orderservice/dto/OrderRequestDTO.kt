@@ -3,6 +3,7 @@ package it.polito.wa2.project.orderservice.dto
 import it.polito.wa2.project.orderservice.domain.OrderStatus
 
 data class OrderRequestDTO(
+    var uuid: String,
     var orderId: Long?,
     var buyerId: Long?,
 

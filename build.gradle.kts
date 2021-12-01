@@ -46,6 +46,7 @@ dependencies {
     implementation("io.debezium:debezium-embedded:1.7.1.Final")
     implementation("io.debezium:debezium-connector-mysql:1.7.1.Final")
 
+
 }
 
 tasks.withType<KotlinCompile> {

@@ -52,6 +52,7 @@ class OutboxListener(val orderRequestConnector: io.debezium.config.Configuration
                     )
 
                 println("TODO create order as requested calling service") //TODO
+                println("Record payload: ${payload["id"]}")
                 /*customerService.replicateData(payload, operation)*/
             }
         }
