@@ -5,4 +5,7 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface OrderRequestRepository: CrudRepository<OrderRequest, Long>
+interface OrderRequestRepository: CrudRepository<OrderRequest, Long> {
+
+    fun findByUuid(uuid: String): Set<OrderRequest>
+}

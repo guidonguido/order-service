@@ -7,7 +7,6 @@ import javax.persistence.ManyToOne
 @Entity
 class OrderProduct(
 
-    // TODO add CascadeType
     @ManyToOne
     @JoinColumn(name = "order_id", referencedColumnName = "id")
     var order: Order?,

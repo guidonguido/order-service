@@ -21,7 +21,7 @@ class KafkaProducerConfig {
     private val bootstrapAddress: String? = null
 
     @Bean
-    fun producerFactoryError(): ProducerFactory<String, OrderRequestDTO> {
+    fun producerFactoryError(): ProducerFactory<String, OrderResponseDTO> {
         val configProps: MutableMap<String, Any> = HashMap()
         configProps[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapAddress!!
         // configProps[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
@@ -39,7 +39,7 @@ class KafkaProducerConfig {
     }
 
     @Bean
-    fun kafkaTemplateError(): KafkaTemplate<String, OrderRequestDTO> {
+    fun kafkaTemplateError(): KafkaTemplate<String, OrderResponseDTO> {
         return KafkaTemplate(producerFactoryError())
     }
 

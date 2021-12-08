@@ -5,6 +5,7 @@ import io.debezium.embedded.Connect
 import io.debezium.engine.DebeziumEngine
 import io.debezium.engine.RecordChangeEvent
 import io.debezium.engine.format.ChangeEventFormat
+import it.polito.wa2.project.orderservice.dto.OrderResponseDTO
 import it.polito.wa2.project.orderservice.services.OrderService
 import org.apache.commons.lang3.tuple.Pair
 import org.apache.kafka.connect.data.Field
@@ -20,8 +21,8 @@ import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy
 
 @Component
-class OutboxListener(val orderRequestConnector: io.debezium.config.Configuration,
-                      val orderService: OrderService) {
+class OutboxListener(orderRequestConnector: io.debezium.config.Configuration,
+                     val orderService: OrderService) {
     private val executor: Executor = Executors.newSingleThreadExecutor()
 
     private val debeziumEngine: DebeziumEngine<RecordChangeEvent<SourceRecord>>?
@@ -51,9 +52,9 @@ class OutboxListener(val orderRequestConnector: io.debezium.config.Configuration
                             Function { (_, value): Pair<String, Any?> -> value })
                     )
 
-                println("TODO create order as requested calling service") //TODO
-                println("Record payload: ${payload["id"]}")
-                /*customerService.replicateData(payload, operation)*/
+                val orderResponse = OrderResponseDTO(payload["id"] as Long)
+                orderService.publishOrderResponse( orderResponse )
+                println("[Debezium] Record payload: ${payload["id"]}")
             }
         }
     }

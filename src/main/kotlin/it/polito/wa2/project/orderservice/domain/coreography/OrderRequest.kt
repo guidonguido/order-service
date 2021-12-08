@@ -8,9 +8,8 @@ import javax.persistence.OneToMany
 @Entity
 class OrderRequest (
 
-    // TODO Add OrderRequest UUID
-    var uuid: String,
-
+    var uuid: String
+/*
     var orderId: Long?,
     var buyerId: Long?,
 
@@ -29,6 +28,7 @@ class OrderRequest (
 
     var transactionReason: String?,
     var reasonDetail: Long? = null
+*/
     ): EntityBase<Long>()
 
     /**

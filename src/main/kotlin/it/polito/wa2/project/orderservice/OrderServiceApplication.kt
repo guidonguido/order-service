@@ -2,21 +2,28 @@ package it.polito.wa2.project.orderservice
 
 import it.polito.wa2.project.orderservice.dto.OrderRequestDTO
 import it.polito.wa2.project.orderservice.dto.OrderResponseDTO
+import it.polito.wa2.project.orderservice.exceptions.ExistingRequestException
+import it.polito.wa2.project.orderservice.services.OrderService
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.kafka.annotation.KafkaListener
 
 @SpringBootApplication
-class OrderServiceApplication{
+class OrderServiceApplication( val orderService: OrderService ){
 
-    // TODO change in arrayOf("orderWalletSagaRequest")
-    @KafkaListener(topics = arrayOf("orderCatalogSagaRequest"), groupId = "group1")
+    @KafkaListener(topics = arrayOf("orderWalletSagaRequest"), groupId = "group1")
     fun loadOrderSagaRequest( orderRequestDTO: OrderRequestDTO ) {
         try{
             println("OrderRequest arrived on orderservice: $orderRequestDTO")
-            println("TODO create order as requested, if UUID not present in DB") //TODO
+            orderService.addOrderByRequest( orderRequestDTO );
+        }catch (e: ExistingRequestException){
+            println("ExistingRequestException: ${e.message}");
+            val orderResponse = OrderResponseDTO(null, orderRequestDTO.uuid, -2);
+            orderService.publishOrderSagaError(orderResponse);
         } catch (e: Exception){
-            println("Exception on orderSagaRequest KafkaListener")
+            println("loadOrderSagaRequest generic Error");
+            val orderResponse = OrderResponseDTO(null, orderRequestDTO.uuid, -1);
+            orderService.publishOrderSagaError(orderResponse);
         }
         // TODO Send email to buyerId with OrderId, OrderStatus
     }

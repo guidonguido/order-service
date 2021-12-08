@@ -32,4 +32,9 @@ class KafkaTopicConfig {
         return NewTopic("orderSagaResponse", 1, 1.toShort())
     }
 
+    @Bean
+    fun orderOrderSagaResponseTopic(): NewTopic {
+        return NewTopic("orderOrderSagaResponse", 1, 1.toShort())
+    }
+
 }

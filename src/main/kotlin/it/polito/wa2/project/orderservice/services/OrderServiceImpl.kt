@@ -3,12 +3,15 @@ package it.polito.wa2.project.orderservice.services
 import it.polito.wa2.project.orderservice.domain.Order
 import it.polito.wa2.project.orderservice.domain.OrderProduct
 import it.polito.wa2.project.orderservice.domain.OrderStatus
+import it.polito.wa2.project.orderservice.domain.coreography.OrderRequest
 import it.polito.wa2.project.orderservice.dto.OrderDTO
 import it.polito.wa2.project.orderservice.dto.OrderRequestDTO
 import it.polito.wa2.project.orderservice.dto.OrderResponseDTO
 import it.polito.wa2.project.orderservice.dto.toOrderDTO
+import it.polito.wa2.project.orderservice.exceptions.ExistingRequestException
 import it.polito.wa2.project.orderservice.repositories.OrderRepository
 import it.polito.wa2.project.orderservice.exceptions.NotFoundException
+import it.polito.wa2.project.orderservice.repositories.coreography.OrderRequestRepository
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.support.SendResult
 import org.springframework.stereotype.Service
@@ -19,7 +22,8 @@ import javax.transaction.Transactional
 @Service
 @Transactional
 class OrderServiceImpl( private val orderRepository: OrderRepository,
-                        val kafkaTemplateError: KafkaTemplate<String, OrderRequestDTO>,
+                        private val orderRequestRepository: OrderRequestRepository,
+                        val kafkaTemplateError: KafkaTemplate<String, OrderResponseDTO>,
                         val kafkaTemplateResponse: KafkaTemplate<String, OrderResponseDTO>
 ): OrderService {
 
@@ -63,7 +67,7 @@ class OrderServiceImpl( private val orderRepository: OrderRepository,
 
         if (order.isEmpty) throw NotFoundException("[OrderService Exception] Selected orderId does not exist")
 
-        var updatedOrder = order.get()
+        val updatedOrder = order.get()
         updatedOrder.status = status
 
         return  orderRepository.save(updatedOrder).toOrderDTO()
@@ -80,7 +84,7 @@ class OrderServiceImpl( private val orderRepository: OrderRepository,
         return deletedOrder.toOrderDTO()
     }
 
-    override fun deleteBuyerOrder(buyerId: Long, orderId: Long): OrderDTO {
+    override fun deleteBuyerOrder(orderId: Long, buyerId: Long): OrderDTO {
         val order = orderRepository.findById(orderId)
 
         if (order.isEmpty) throw NotFoundException("[OrderService Exception] Selected orderId does not exist, no deletion is possible")
@@ -92,9 +96,35 @@ class OrderServiceImpl( private val orderRepository: OrderRepository,
         return deletedOrder.toOrderDTO()
     }
 
-    fun publishOrderResponse( orderResponseDTO: OrderResponseDTO ){
-        //TODO
-        println("Service publishes response")
+    override fun addOrderByRequest( orderRequestDTO: OrderRequestDTO ): OrderDTO {
+
+        val existingRequest = orderRequestRepository.findByUuid(orderRequestDTO.uuid)
+
+        if( existingRequest.isNotEmpty() ) throw ExistingRequestException("OrderRequest[uuid:${orderRequestDTO.uuid}] has already been processed ")
+
+        orderRequestRepository.save(OrderRequest(orderRequestDTO.uuid))
+
+        val newOrder =
+            Order(orderRequestDTO.buyerId!!,
+                orderRequestDTO.deliveryName,
+                orderRequestDTO.deliveryStreet,
+                orderRequestDTO.deliveryZip,
+                orderRequestDTO.deliveryCity,
+                orderRequestDTO.deliveryNumber,
+                orderRequestDTO.status!!,
+                )
+
+        orderRequestDTO.orderProducts.forEach{
+            newOrder.addOrderProduct( OrderProduct(null,
+                it.purchasedProductId,
+                it.amount,
+                it.purchasedProductPrice,
+                it.warehouseId ))}
+
+        return orderRepository.save(newOrder).toOrderDTO()
+    }
+
+    override fun publishOrderResponse( orderResponseDTO: OrderResponseDTO ){
 
         val future: ListenableFuture<SendResult<String, OrderResponseDTO>> = kafkaTemplateResponse.send("orderSagaResponse", orderResponseDTO)
         future.addCallback(object: ListenableFutureCallback<SendResult<String, OrderResponseDTO>> {
@@ -108,18 +138,16 @@ class OrderServiceImpl( private val orderRepository: OrderRepository,
         })
     }
 
-    fun publishOrderSagaError( orderRequestDTO: OrderRequestDTO ){
-        //TODO
-        println("Service publishes error to wallet service topic")
+    override fun publishOrderSagaError( orderResponseDTO: OrderResponseDTO ){
 
-        val future: ListenableFuture<SendResult<String, OrderRequestDTO>> = kafkaTemplateError.send("orderSagaRequest", orderRequestDTO)
-        future.addCallback(object: ListenableFutureCallback<SendResult<String, OrderRequestDTO>> {
-            override fun onSuccess(result: SendResult<String, OrderRequestDTO>?) {
-                println("Sent message orderRequestDTO")
+        val future: ListenableFuture<SendResult<String, OrderResponseDTO>> = kafkaTemplateError.send("orderOrderSagaResponse", orderResponseDTO)
+        future.addCallback(object: ListenableFutureCallback<SendResult<String, OrderResponseDTO>> {
+            override fun onSuccess(result: SendResult<String, OrderResponseDTO>?) {
+                println("Sent message orderRequestDTO after Error")
             }
 
             override fun onFailure(ex: Throwable) {
-                println("Unable to send message orderRequestDTO")
+                println("Unable to send message orderRequestDTO after Error")
             }
         })
     }
