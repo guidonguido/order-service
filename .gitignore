@@ -5,6 +5,8 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+dbhistory.dat
+
 ### STS ###
 .apt_generated
 .classpath
