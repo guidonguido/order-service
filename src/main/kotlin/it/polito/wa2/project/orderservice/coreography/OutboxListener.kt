@@ -52,7 +52,7 @@ class OutboxListener(orderRequestConnector: io.debezium.config.Configuration,
                             Function { (_, value): Pair<String, Any?> -> value })
                     )
 
-                val orderResponse = OrderResponseDTO(payload["id"] as Long)
+                val orderResponse = OrderResponseDTO(payload["id"] as Long, payload["uuid"] as String, 1)
                 orderService.publishOrderResponse( orderResponse )
                 println("[Debezium] Record payload: ${payload["id"]}")
             }
