@@ -23,6 +23,8 @@ repositories {
     mavenCentral()
 }
 
+extra["springCloudVersion"] = "2020.0.4"
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -46,7 +48,14 @@ dependencies {
     implementation("io.debezium:debezium-embedded:1.7.1.Final")
     implementation("io.debezium:debezium-connector-mysql:1.7.1.Final")
 
+    // EUREKA CLIENT
+    implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
+}
 
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
+    }
 }
 
 tasks.withType<KotlinCompile> {

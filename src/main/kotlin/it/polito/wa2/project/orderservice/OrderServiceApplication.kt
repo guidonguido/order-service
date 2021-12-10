@@ -6,9 +6,11 @@ import it.polito.wa2.project.orderservice.exceptions.ExistingRequestException
 import it.polito.wa2.project.orderservice.services.OrderService
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient
 import org.springframework.kafka.annotation.KafkaListener
 
 @SpringBootApplication
+@EnableEurekaClient
 class OrderServiceApplication( val orderService: OrderService ){
 
     @KafkaListener(topics = arrayOf("orderWalletSagaRequest"), groupId = "group1")
