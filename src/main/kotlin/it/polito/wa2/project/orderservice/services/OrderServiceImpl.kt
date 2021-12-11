@@ -4,10 +4,7 @@ import it.polito.wa2.project.orderservice.domain.Order
 import it.polito.wa2.project.orderservice.domain.OrderProduct
 import it.polito.wa2.project.orderservice.domain.OrderStatus
 import it.polito.wa2.project.orderservice.domain.coreography.OrderRequest
-import it.polito.wa2.project.orderservice.dto.OrderDTO
-import it.polito.wa2.project.orderservice.dto.OrderRequestDTO
-import it.polito.wa2.project.orderservice.dto.OrderResponseDTO
-import it.polito.wa2.project.orderservice.dto.toOrderDTO
+import it.polito.wa2.project.orderservice.dto.*
 import it.polito.wa2.project.orderservice.exceptions.ExistingRequestException
 import it.polito.wa2.project.orderservice.repositories.OrderRepository
 import it.polito.wa2.project.orderservice.exceptions.NotFoundException
@@ -24,7 +21,7 @@ import javax.transaction.Transactional
 class OrderServiceImpl( private val orderRepository: OrderRepository,
                         private val orderRequestRepository: OrderRequestRepository,
                         val kafkaTemplateError: KafkaTemplate<String, OrderResponseDTO>,
-                        val kafkaTemplateResponse: KafkaTemplate<String, OrderResponseDTO>
+                        val kafkaTemplateRequest: KafkaTemplate<String, OrderRequestDTO>
 ): OrderService {
 
     override fun getOrders(): Set<OrderDTO> =
@@ -96,13 +93,12 @@ class OrderServiceImpl( private val orderRepository: OrderRepository,
         return deletedOrder.toOrderDTO()
     }
 
-    override fun addOrderByRequest( orderRequestDTO: OrderRequestDTO ): OrderDTO {
+
+    override fun addOrderByRequest( orderRequestDTO: OrderRequestDTO ): OrderRequestDTO {
 
         val existingRequest = orderRequestRepository.findByUuid(orderRequestDTO.uuid)
 
         if( existingRequest.isNotEmpty() ) throw ExistingRequestException("OrderRequest[uuid:${orderRequestDTO.uuid}] has already been processed ")
-
-        orderRequestRepository.save(OrderRequest(orderRequestDTO.uuid))
 
         val newOrder =
             Order(orderRequestDTO.buyerId!!,
@@ -121,14 +117,30 @@ class OrderServiceImpl( private val orderRepository: OrderRepository,
                 it.purchasedProductPrice,
                 it.warehouseId ))}
 
-        return orderRepository.save(newOrder).toOrderDTO()
+        orderRepository.save(newOrder)
+
+        return orderRequestRepository.save(OrderRequest(
+            orderRequestDTO.uuid,
+            orderRequestDTO.orderId,
+            orderRequestDTO.buyerId,
+            orderRequestDTO.deliveryName,
+            orderRequestDTO.deliveryStreet,
+            orderRequestDTO.deliveryZip,
+            orderRequestDTO.deliveryCity,
+            orderRequestDTO.deliveryNumber,
+            orderRequestDTO.status,
+            mutableSetOf(),
+            orderRequestDTO.totalPrice,
+            orderRequestDTO.destinationWalletId,
+            orderRequestDTO.sourceWalletId,
+            orderRequestDTO.transactionReason)).toOrderRequestDTO()
     }
 
-    override fun publishOrderResponse( orderResponseDTO: OrderResponseDTO ){
+    override fun publishOrderRequest( orderRequestDTO: OrderRequestDTO ){
 
-        val future: ListenableFuture<SendResult<String, OrderResponseDTO>> = kafkaTemplateResponse.send("orderSagaResponse", orderResponseDTO)
-        future.addCallback(object: ListenableFutureCallback<SendResult<String, OrderResponseDTO>> {
-            override fun onSuccess(result: SendResult<String, OrderResponseDTO>?) {
+        val future: ListenableFuture<SendResult<String, OrderRequestDTO>> = kafkaTemplateRequest.send("orderOrderSagaRequest", orderRequestDTO)
+        future.addCallback(object: ListenableFutureCallback<SendResult<String, OrderRequestDTO>> {
+            override fun onSuccess(result: SendResult<String, OrderRequestDTO>?) {
                 println("Sent message orderResponseDTO")
             }
 

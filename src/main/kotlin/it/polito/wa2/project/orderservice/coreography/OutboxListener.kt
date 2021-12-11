@@ -5,6 +5,8 @@ import io.debezium.embedded.Connect
 import io.debezium.engine.DebeziumEngine
 import io.debezium.engine.RecordChangeEvent
 import io.debezium.engine.format.ChangeEventFormat
+import it.polito.wa2.project.orderservice.domain.OrderStatus
+import it.polito.wa2.project.orderservice.dto.OrderRequestDTO
 import it.polito.wa2.project.orderservice.dto.OrderResponseDTO
 import it.polito.wa2.project.orderservice.services.OrderService
 import org.apache.commons.lang3.tuple.Pair
@@ -52,9 +54,24 @@ class OutboxListener(orderRequestConnector: io.debezium.config.Configuration,
                             Function { (_, value): Pair<String, Any?> -> value })
                     )
 
-                val orderResponse = OrderResponseDTO(payload["id"] as Long, payload["uuid"] as String, 1)
-                orderService.publishOrderResponse( orderResponse )
-                println("[Debezium] Record payload: ${payload["id"]}")
+                val orderRequest = OrderRequestDTO(
+                    payload["uuid"] as String,
+                    payload["order_id"] as Long?,
+                    payload["buyer_id"] as Long?,
+                    payload["delivery_name"] as String,
+                    payload["delivery_street"] as String,
+                    payload["delivery_zip"] as String,
+                    payload["delivery_city"] as String,
+                    payload["delivery_number"] as String,
+                    OrderStatus.fromString(payload["status"].toString()),
+                    emptySet(),
+                    payload["total_price"] as Double?,
+                    payload["destination_wallet_id"] as Long?,
+                    payload["source_wallet_id"] as Long,
+                    payload["transaction_reason"].toString(),
+                )
+                orderService.publishOrderRequest( orderRequest )
+                println("[Debezium] Record request payload uuid : ${payload["uuid"]}")
             }
         }
     }

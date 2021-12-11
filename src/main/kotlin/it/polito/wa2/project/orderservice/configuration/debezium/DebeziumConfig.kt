@@ -27,8 +27,7 @@ class DebeziumConfig {
             .with("database.history", "io.debezium.relational.history.FileDatabaseHistory")
             .with("database.history.file.filename", "./tmp/dbhistory.dat")
             // .with("table.whitelist", "orders")
-            .with("table.include.list", "orderservice.orders")
-
+            .with("table.include.list", "orderservice.order_request")
             .with("database.history.skip.unparseable.ddl", true)
             .with("database.allowPublicKeyRetrieval", true)
             .build()

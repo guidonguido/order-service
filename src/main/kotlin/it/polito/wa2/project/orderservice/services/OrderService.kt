@@ -1,6 +1,7 @@
 package it.polito.wa2.project.orderservice.services
 
 import it.polito.wa2.project.orderservice.domain.OrderStatus
+import it.polito.wa2.project.orderservice.domain.coreography.OrderRequest
 import it.polito.wa2.project.orderservice.dto.OrderDTO
 import it.polito.wa2.project.orderservice.dto.OrderRequestDTO
 import it.polito.wa2.project.orderservice.dto.OrderResponseDTO
@@ -20,10 +21,10 @@ interface OrderService {
 
     fun deleteBuyerOrder(orderId: Long, buyerId: Long): OrderDTO
 
-    fun addOrderByRequest( orderRequestDTO: OrderRequestDTO): OrderDTO
+    fun addOrderByRequest( orderRequestDTO: OrderRequestDTO): OrderRequestDTO
 
     fun publishOrderSagaError( orderResponseDTO: OrderResponseDTO )
 
-    fun publishOrderResponse( orderResponseDTO: OrderResponseDTO)
+    fun publishOrderRequest( orderRequestDTO: OrderRequestDTO)
 
 }

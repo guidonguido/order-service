@@ -1,6 +1,7 @@
 package it.polito.wa2.project.orderservice.dto
 
 import it.polito.wa2.project.orderservice.domain.OrderStatus
+import it.polito.wa2.project.orderservice.domain.coreography.OrderRequest
 
 data class OrderRequestDTO(
     var uuid: String,
@@ -21,13 +22,13 @@ data class OrderRequestDTO(
     var destinationWalletId: Long?,
     var sourceWalletId: Long,
 
-    var transactionReason: String?,
-    var reasonDetail: Long?
+    var transactionReason: String?
 )
 
 
-/**
+
 fun OrderRequest.toOrderRequestDTO() = OrderRequestDTO(
+    uuid,
     orderId,
     buyerId,
     deliveryName,
@@ -40,14 +41,5 @@ fun OrderRequest.toOrderRequestDTO() = OrderRequestDTO(
     totalPrice,
     destinationWalletId,
     sourceWalletId,
-    transactionReason,
-    reasonDetail,
+    transactionReason
 )
-
-fun OrderProduct.toOrderProductDTO() = OrderProductDTO(
-    purchasedProductId,
-    quantity,
-    purchasedProductPrice,
-    warehouseId
-)
-        */

@@ -1,15 +1,19 @@
 package it.polito.wa2.project.orderservice.domain.coreography
 
 import it.polito.wa2.project.orderservice.domain.EntityBase
+import it.polito.wa2.project.orderservice.domain.OrderProduct
 import it.polito.wa2.project.orderservice.domain.OrderStatus
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.OneToMany
+import javax.persistence.UniqueConstraint
 
 @Entity
 class OrderRequest (
 
-    var uuid: String
-/*
+    @Column(unique=true)
+    var uuid: String,
+
     var orderId: Long?,
     var buyerId: Long?,
 
@@ -21,20 +25,17 @@ class OrderRequest (
 
     var status: OrderStatus?,
 
+    @OneToMany(mappedBy = "order", targetEntity = OrderProduct::class)
+    var orderProducts: MutableSet<OrderProduct> = mutableSetOf(),
+    
     var totalPrice: Double?,
 
     var destinationWalletId: Long?,
     var sourceWalletId: Long,
 
-    var transactionReason: String?,
-    var reasonDetail: Long? = null
-*/
-    ): EntityBase<Long>()
+    var transactionReason: String?
 
-    /**
-    @OneToMany(mappedBy = "orderRequest", targetEntity = OrderProduct::class)
-    var orderProducts: MutableSet<OrderProduct> = mutableSetOf(),
-    */
+    ): EntityBase<Long>()
 
 
     /**

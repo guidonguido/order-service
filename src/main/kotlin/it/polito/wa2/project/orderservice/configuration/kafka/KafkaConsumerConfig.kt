@@ -11,6 +11,7 @@ import org.springframework.kafka.annotation.EnableKafka
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 import org.springframework.kafka.support.serializer.JsonDeserializer
 
 
@@ -33,7 +34,12 @@ class KafkaConsumerConfig {
         props[ConsumerConfig.GROUP_ID_CONFIG] = groupId!!
         // props[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
         // props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = JsonDeserializer::class.java
-        return DefaultKafkaConsumerFactory(props, StringDeserializer(), JsonDeserializer(OrderRequestDTO::class.java))
+        val errorHandlingDeserializer: ErrorHandlingDeserializer<OrderRequestDTO> = ErrorHandlingDeserializer(
+            JsonDeserializer(
+                OrderRequestDTO::class.java
+            )
+        )
+        return DefaultKafkaConsumerFactory(props, StringDeserializer(), errorHandlingDeserializer)
     }
 
     @Bean

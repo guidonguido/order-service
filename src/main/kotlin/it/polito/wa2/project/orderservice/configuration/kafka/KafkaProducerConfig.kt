@@ -1,5 +1,6 @@
 package it.polito.wa2.project.orderservice.configuration.kafka
 
+import it.polito.wa2.project.orderservice.domain.coreography.OrderRequest
 import it.polito.wa2.project.orderservice.dto.OrderRequestDTO
 import it.polito.wa2.project.orderservice.dto.OrderResponseDTO
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -30,7 +31,7 @@ class KafkaProducerConfig {
     }
 
     @Bean
-    fun producerFactoryResponse(): ProducerFactory<String, OrderResponseDTO> {
+    fun producerFactoryRequest(): ProducerFactory<String, OrderRequestDTO> {
         val configProps: MutableMap<String, Any> = HashMap()
         configProps[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapAddress!!
         // configProps[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
@@ -44,7 +45,7 @@ class KafkaProducerConfig {
     }
 
     @Bean
-    fun kafkaTemplateResponse(): KafkaTemplate<String, OrderResponseDTO> {
-        return KafkaTemplate(producerFactoryResponse())
+    fun kafkaTemplateRequest(): KafkaTemplate<String, OrderRequestDTO> {
+        return KafkaTemplate(producerFactoryRequest())
     }
 }
