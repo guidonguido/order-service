@@ -13,7 +13,7 @@ import org.springframework.kafka.annotation.KafkaListener
 @EnableEurekaClient
 class OrderServiceApplication( val orderService: OrderService ) {
 
-    @KafkaListener(topics = arrayOf("orderWarehouseSagaRequest"), groupId = "group1")
+    @KafkaListener(topics = arrayOf("orderWarehouseSagaRequest"), groupId = "group1", containerFactory = "kafkaListenerContainerFactoryRequest")
     fun loadOrderSagaRequest(orderRequestDTO: OrderRequestDTO) {
         try {
             println("OrderRequest arrived on orderservice: $orderRequestDTO")
@@ -30,7 +30,7 @@ class OrderServiceApplication( val orderService: OrderService ) {
         // TODO Send email to buyerId with OrderId, OrderStatus
     }
 
-    @KafkaListener(topics = arrayOf("orderWalletSagaRequest"), groupId = "group1")
+    @KafkaListener(topics = arrayOf("orderWalletSagaRequest"), groupId = "group1", containerFactory = "kafkaListenerContainerFactoryResponse")
     fun loadOrderSagaRequest(orderResponseDTO: OrderResponseDTO) {
         if (orderResponseDTO.exitStatus == -1L) {
             println("OrderResonse [Saga Error] arrived on orderservice: $orderResponseDTO")
@@ -42,8 +42,7 @@ class OrderServiceApplication( val orderService: OrderService ) {
         /**
          *
         {
-        "uuid": "hawjbq2",
-        "buyerId": 11,
+        "buyerId": 1,
         "deliveryName": "Guido Ricioppo",
         "deliveryStreet": "via Saluzzo 13",
         "deliveryZip": "10111",
@@ -51,18 +50,14 @@ class OrderServiceApplication( val orderService: OrderService ) {
         "deliveryNumber": "3433333333",
         "status": "ISSUED",
         "orderProducts": [
-        {"purchasedProductId": 112,
-        "amount": 2,
-        "purchasedProductPrice": 12,
-        "warehouseId": 3333
+        {"purchasedProductId": 1,
+        "quantity": 2
         }
         ],
-        "totalPrice": 12,
-        "destinationWalletId": 1,
-        "sourceWalletId": 12,
+        "destinationWalletId": 2,
+        "sourceWalletId": 1,
 
-        "transactionReason": "hell",
-        "reasonDetail": 1
+        "transactionReason": "hell"
         }
          */
     }

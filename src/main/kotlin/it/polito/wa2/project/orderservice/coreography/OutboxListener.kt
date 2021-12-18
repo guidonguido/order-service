@@ -70,6 +70,8 @@ class OutboxListener(orderRequestConnector: io.debezium.config.Configuration,
                     payload["source_wallet_id"] as Long,
                     payload["transaction_reason"].toString(),
                 )
+
+
                 orderService.publishOrderRequest( orderRequest )
                 println("[Debezium] Record request payload uuid : ${payload["uuid"]}")
             }

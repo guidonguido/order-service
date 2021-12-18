@@ -52,7 +52,7 @@ class OrderServiceImpl( private val orderRepository: OrderRepository,
         order.orderProducts.forEach{
             newOrder.addOrderProduct( OrderProduct(null,
                 it.purchasedProductId,
-                it.amount,
+                it.quantity,
                 it.purchasedProductPrice,
                 it.warehouseId ))}
 
@@ -113,22 +113,22 @@ class OrderServiceImpl( private val orderRepository: OrderRepository,
         orderRequestDTO.orderProducts.forEach{
             newOrder.addOrderProduct( OrderProduct(null,
                 it.purchasedProductId,
-                it.amount,
+                it.quantity,
                 it.purchasedProductPrice,
                 it.warehouseId ))}
 
-        orderRepository.save(newOrder)
+        val addedOrder: Order = orderRepository.save(newOrder)
 
         return orderRequestRepository.save(OrderRequest(
             orderRequestDTO.uuid,
-            orderRequestDTO.orderId,
+            addedOrder.getId(),
             orderRequestDTO.buyerId,
             orderRequestDTO.deliveryName,
             orderRequestDTO.deliveryStreet,
             orderRequestDTO.deliveryZip,
             orderRequestDTO.deliveryCity,
             orderRequestDTO.deliveryNumber,
-            orderRequestDTO.status,
+            addedOrder.status,
             mutableSetOf(),
             orderRequestDTO.totalPrice,
             orderRequestDTO.destinationWalletId,

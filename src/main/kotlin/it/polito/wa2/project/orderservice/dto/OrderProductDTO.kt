@@ -5,14 +5,14 @@ import java.math.BigDecimal
 
 data class OrderProductDTO(
     var purchasedProductId: Long,             // productId of purchased product
-    var amount: Long,
+    var quantity: Long,
     var purchasedProductPrice: Double,   // Product(productId)'s price
     var warehouseId: Long                    // warehouseId products are picked from
 )
 
 fun OrderProduct.toOrderProductDTO() = OrderProductDTO(
     purchasedProductId,
-    amount,
+    quantity,
     purchasedProductPrice,
     warehouseId
 )

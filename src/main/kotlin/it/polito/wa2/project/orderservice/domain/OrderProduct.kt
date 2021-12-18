@@ -13,7 +13,7 @@ class OrderProduct(
 
     var purchasedProductId: Long,             // productId of purchased product
 
-    var amount: Long,
+    var quantity: Long,
 
     var purchasedProductPrice: Double,   // Product(productId)'s price
 

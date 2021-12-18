@@ -25,10 +25,30 @@ class KafkaConsumerConfig {
     @Value(value = "\${spring.kafka.consumer.group-id}")
     private val groupId: String? = null
 
-
+    @Bean
+    fun consumerFactoryResponse(): ConsumerFactory<String, OrderResponseDTO> {
+        val props: MutableMap<String, Any> = HashMap()
+        props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapAddress!!
+        props[ConsumerConfig.GROUP_ID_CONFIG] = groupId!!
+        // props[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
+        // props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = JsonDeserializer::class.java
+        val errorHandlingDeserializer: ErrorHandlingDeserializer<OrderResponseDTO> = ErrorHandlingDeserializer(
+            JsonDeserializer(
+                OrderResponseDTO::class.java
+            ).trustedPackages("*").ignoreTypeHeaders()
+        )
+        return DefaultKafkaConsumerFactory(props, StringDeserializer(), errorHandlingDeserializer)
+    }
 
     @Bean
-    fun consumerFactory(): ConsumerFactory<String, OrderRequestDTO> {
+    fun kafkaListenerContainerFactoryResponse(): ConcurrentKafkaListenerContainerFactory<String, OrderResponseDTO> {
+        val factory = ConcurrentKafkaListenerContainerFactory<String, OrderResponseDTO>()
+        factory.setConsumerFactory(consumerFactoryResponse())
+        return factory
+    }
+
+    @Bean
+    fun consumerFactoryRequest(): ConsumerFactory<String, OrderRequestDTO> {
         val props: MutableMap<String, Any> = HashMap()
         props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapAddress!!
         props[ConsumerConfig.GROUP_ID_CONFIG] = groupId!!
@@ -37,15 +57,15 @@ class KafkaConsumerConfig {
         val errorHandlingDeserializer: ErrorHandlingDeserializer<OrderRequestDTO> = ErrorHandlingDeserializer(
             JsonDeserializer(
                 OrderRequestDTO::class.java
-            )
+            ).trustedPackages("*").ignoreTypeHeaders()
         )
         return DefaultKafkaConsumerFactory(props, StringDeserializer(), errorHandlingDeserializer)
     }
 
     @Bean
-    fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, OrderRequestDTO> {
+    fun kafkaListenerContainerFactoryRequest(): ConcurrentKafkaListenerContainerFactory<String, OrderRequestDTO> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, OrderRequestDTO>()
-        factory.setConsumerFactory(consumerFactory())
+        factory.setConsumerFactory(consumerFactoryRequest())
         return factory
     }
 }
