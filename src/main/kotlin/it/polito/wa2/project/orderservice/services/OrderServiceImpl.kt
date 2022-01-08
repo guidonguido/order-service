@@ -5,6 +5,9 @@ import it.polito.wa2.project.orderservice.domain.OrderProduct
 import it.polito.wa2.project.orderservice.domain.OrderStatus
 import it.polito.wa2.project.orderservice.domain.coreography.OrderRequest
 import it.polito.wa2.project.orderservice.dto.*
+import it.polito.wa2.project.orderservice.dto.common.NotificationRequestDTO
+import it.polito.wa2.project.orderservice.dto.common.OrderRequestDTO
+import it.polito.wa2.project.orderservice.dto.common.toOrderRequestDTO
 import it.polito.wa2.project.orderservice.exceptions.ExistingRequestException
 import it.polito.wa2.project.orderservice.repositories.OrderRepository
 import it.polito.wa2.project.orderservice.exceptions.NotFoundException
@@ -21,7 +24,8 @@ import javax.transaction.Transactional
 class OrderServiceImpl( private val orderRepository: OrderRepository,
                         private val orderRequestRepository: OrderRequestRepository,
                         val kafkaTemplateError: KafkaTemplate<String, OrderResponseDTO>,
-                        val kafkaTemplateRequest: KafkaTemplate<String, OrderRequestDTO>
+                        val kafkaTemplateRequest: KafkaTemplate<String, OrderRequestDTO>,
+                        val kafkaTemplateNotification: KafkaTemplate<String, NotificationRequestDTO>
 ): OrderService {
 
     override fun getOrders(): Set<OrderDTO> =
@@ -81,6 +85,21 @@ class OrderServiceImpl( private val orderRepository: OrderRepository,
         return deletedOrder.toOrderDTO()
     }
 
+    override fun deleteOrderByRequest(orderId: Long, uuid: String) {
+        val order = orderRepository.findById(orderId)
+
+        if (order.isEmpty) throw NotFoundException("[OrderService Exception] Selected orderId does not exist, no deletion is possible")
+
+        val orderRequest = orderRequestRepository.findByUuid(uuid)
+
+        if(orderRequest.isNotEmpty()) orderRequest.first().status = OrderStatus.FAILED;
+        else return
+
+        val deletedOrder = order.get()
+        orderRepository.delete(deletedOrder)
+
+    }
+
     override fun deleteBuyerOrder(orderId: Long, buyerId: Long): OrderDTO {
         val order = orderRepository.findById(orderId)
 
@@ -128,7 +147,7 @@ class OrderServiceImpl( private val orderRepository: OrderRepository,
             orderRequestDTO.deliveryZip,
             orderRequestDTO.deliveryCity,
             orderRequestDTO.deliveryNumber,
-            addedOrder.status,
+            OrderStatus.fromString(addedOrder.status.toString()),
             mutableSetOf(),
             orderRequestDTO.totalPrice,
             orderRequestDTO.destinationWalletId,
@@ -160,6 +179,20 @@ class OrderServiceImpl( private val orderRepository: OrderRepository,
 
             override fun onFailure(ex: Throwable) {
                 println("Unable to send message orderRequestDTO after Error")
+            }
+        })
+    }
+
+    override fun publishNotification( notificationRequestDTO: NotificationRequestDTO ){
+
+        val future: ListenableFuture<SendResult<String, NotificationRequestDTO>> = kafkaTemplateNotification.send("orderOrderSagaRequest", notificationRequestDTO)
+        future.addCallback(object: ListenableFutureCallback<SendResult<String, NotificationRequestDTO>> {
+            override fun onSuccess(result: SendResult<String, NotificationRequestDTO>?) {
+                println("Sent message notificationRequestDTO")
+            }
+
+            override fun onFailure(ex: Throwable) {
+                println("Unable to send message notificationRequestDTO")
             }
         })
     }
