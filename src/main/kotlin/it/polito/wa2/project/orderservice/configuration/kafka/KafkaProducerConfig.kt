@@ -1,8 +1,8 @@
 package it.polito.wa2.project.orderservice.configuration.kafka
 
-import it.polito.wa2.project.orderservice.domain.coreography.OrderRequest
-import it.polito.wa2.project.orderservice.dto.OrderRequestDTO
 import it.polito.wa2.project.orderservice.dto.OrderResponseDTO
+import it.polito.wa2.project.orderservice.dto.common.NotificationRequestDTO
+import it.polito.wa2.project.orderservice.dto.common.OrderRequestDTO
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
@@ -37,6 +37,20 @@ class KafkaProducerConfig {
         // configProps[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
         // configProps[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
         return DefaultKafkaProducerFactory(configProps, StringSerializer(), JsonSerializer())
+    }
+
+    @Bean
+    fun producerFactoryNotification(): ProducerFactory<String, NotificationRequestDTO> {
+        val configProps: MutableMap<String, Any> = HashMap()
+        configProps[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapAddress!!
+        // configProps[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
+        // configProps[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
+        return DefaultKafkaProducerFactory(configProps, StringSerializer(), JsonSerializer())
+    }
+
+    @Bean
+    fun kafkaTemplateNotification(): KafkaTemplate<String, NotificationRequestDTO> {
+        return KafkaTemplate(producerFactoryNotification())
     }
 
     @Bean

@@ -1,6 +1,6 @@
 package it.polito.wa2.project.orderservice.configuration.kafka
 
-import it.polito.wa2.project.orderservice.dto.OrderRequestDTO
+import it.polito.wa2.project.orderservice.dto.common.OrderRequestDTO
 import it.polito.wa2.project.orderservice.dto.OrderResponseDTO
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer

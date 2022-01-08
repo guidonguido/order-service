@@ -1,7 +1,9 @@
-package it.polito.wa2.project.orderservice.dto
+package it.polito.wa2.project.orderservice.dto.common
 
 import it.polito.wa2.project.orderservice.domain.OrderStatus
 import it.polito.wa2.project.orderservice.domain.coreography.OrderRequest
+import it.polito.wa2.project.orderservice.dto.OrderProductDTO
+import it.polito.wa2.project.orderservice.dto.toOrderProductDTO
 
 data class OrderRequestDTO(
     var uuid: String,

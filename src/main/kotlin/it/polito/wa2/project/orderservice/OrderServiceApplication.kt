@@ -1,7 +1,7 @@
 package it.polito.wa2.project.orderservice
 
-import it.polito.wa2.project.orderservice.dto.OrderRequestDTO
 import it.polito.wa2.project.orderservice.dto.OrderResponseDTO
+import it.polito.wa2.project.orderservice.dto.common.OrderRequestDTO
 import it.polito.wa2.project.orderservice.exceptions.ExistingRequestException
 import it.polito.wa2.project.orderservice.services.OrderService
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -17,15 +17,15 @@ class OrderServiceApplication( val orderService: OrderService ) {
     fun loadOrderSagaRequest(orderRequestDTO: OrderRequestDTO) {
         try {
             println("OrderRequest arrived on orderservice: $orderRequestDTO")
-            orderService.addOrderByRequest(orderRequestDTO);
+            orderService.addOrderByRequest(orderRequestDTO)
         } catch (e: ExistingRequestException) {
-            println("ExistingRequestException: ${e.message}");
+            println("ExistingRequestException: ${e.message}")
             val orderResponse = OrderResponseDTO(null, orderRequestDTO.uuid, -2);
-            orderService.publishOrderSagaError(orderResponse);
+            orderService.publishOrderSagaError(orderResponse)
         } catch (e: Exception) {
             println("loadOrderSagaRequest generic Error");
             val orderResponse = OrderResponseDTO(null, orderRequestDTO.uuid, -1);
-            orderService.publishOrderSagaError(orderResponse);
+            orderService.publishOrderSagaError(orderResponse)
         }
         // TODO Send email to buyerId with OrderId, OrderStatus
     }
@@ -34,15 +34,13 @@ class OrderServiceApplication( val orderService: OrderService ) {
     fun loadOrderSagaRequest(orderResponseDTO: OrderResponseDTO) {
         if (orderResponseDTO.exitStatus == -1L) {
             println("OrderResonse [Saga Error] arrived on orderservice: $orderResponseDTO")
-            orderService.deleteOrder(orderResponseDTO.orderId!!);
-            orderService.publishOrderSagaError(orderResponseDTO);
+            orderService.deleteOrderByRequest(orderResponseDTO.orderId!!, orderResponseDTO.uuid)
         }
         // TODO Send email to buyerId with OrderId, OrderStatus
 
         /**
          *
         {
-        "buyerId": 1,
         "deliveryName": "Guido Ricioppo",
         "deliveryStreet": "via Saluzzo 13",
         "deliveryZip": "10111",
@@ -55,9 +53,9 @@ class OrderServiceApplication( val orderService: OrderService ) {
         }
         ],
         "destinationWalletId": 2,
-        "sourceWalletId": 1,
+        "sourceWalletId": 28,
 
-        "transactionReason": "hell"
+        "transactionReason": "PAYMENT"
         }
          */
     }

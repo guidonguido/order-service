@@ -6,7 +6,7 @@ import io.debezium.engine.DebeziumEngine
 import io.debezium.engine.RecordChangeEvent
 import io.debezium.engine.format.ChangeEventFormat
 import it.polito.wa2.project.orderservice.domain.OrderStatus
-import it.polito.wa2.project.orderservice.dto.OrderRequestDTO
+import it.polito.wa2.project.orderservice.dto.common.OrderRequestDTO
 import it.polito.wa2.project.orderservice.dto.OrderResponseDTO
 import it.polito.wa2.project.orderservice.services.OrderService
 import org.apache.commons.lang3.tuple.Pair
@@ -53,7 +53,6 @@ class OutboxListener(orderRequestConnector: io.debezium.config.Configuration,
                             Function { (key): Pair<String, Any?> -> key },
                             Function { (_, value): Pair<String, Any?> -> value })
                     )
-
                 val orderRequest = OrderRequestDTO(
                     payload["uuid"] as String,
                     payload["order_id"] as Long?,
@@ -70,10 +69,18 @@ class OutboxListener(orderRequestConnector: io.debezium.config.Configuration,
                     payload["source_wallet_id"] as Long,
                     payload["transaction_reason"].toString(),
                 )
+                println("[+++++++++++++++++] Operation = ${operation} \nSTATUS = ${orderRequest.status}\n\n\n")
+
+                if (operation == Envelope.Operation.CREATE) {
+                    orderService.publishOrderRequest(orderRequest)
+                    println("[Debezium] Record request CREATED payload uuid : ${payload["uuid"]}")
+                }
 
 
-                orderService.publishOrderRequest( orderRequest )
-                println("[Debezium] Record request payload uuid : ${payload["uuid"]}")
+                if (operation == Envelope.Operation.UPDATE && orderRequest.status == OrderStatus.FAILED) {
+                    orderService.publishOrderSagaError(OrderResponseDTO(orderRequest.orderId, orderRequest.uuid, -1L));
+                    println("[Debezium] Record request UPDATED payload uuid : ${payload["uuid"]}")
+                }
             }
         }
     }
