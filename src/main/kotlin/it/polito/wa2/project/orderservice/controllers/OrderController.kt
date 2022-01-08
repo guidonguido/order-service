@@ -2,6 +2,7 @@ package it.polito.wa2.project.orderservice.controllers
 
 import it.polito.wa2.project.orderservice.domain.OrderStatus
 import it.polito.wa2.project.orderservice.dto.OrderDTO
+import it.polito.wa2.project.orderservice.dto.common.NotificationRequestDTO
 import it.polito.wa2.project.orderservice.exceptions.NotFoundException
 import it.polito.wa2.project.orderservice.services.OrderService
 import org.springframework.http.HttpStatus
@@ -93,6 +94,7 @@ class OrderController( val orderService: OrderService ){
          * Use NotificationService to send an email to ADMINs and USERs
          * about the updated order status
          */
+
 
         return ResponseEntity(updatedOrderDTO, HttpStatus.OK)
     }

@@ -71,7 +71,16 @@ class OrderServiceImpl( private val orderRepository: OrderRepository,
         val updatedOrder = order.get()
         updatedOrder.status = status
 
-        return  orderRepository.save(updatedOrder).toOrderDTO()
+        val orderDTO: OrderDTO = orderRepository.save(updatedOrder).toOrderDTO()
+
+        publishNotification(NotificationRequestDTO(
+            messageObject = "Order Status Changed",
+            message = "Dear customer,\nOrder with id ${updatedOrder.getId()} changet its status to ${status}\n\n" +
+                    "Best Regards,\nAGTeam OrderService\n",
+            userId = updatedOrder.buyerId
+        ))
+
+        return orderDTO;
     }
 
     override fun deleteOrder(orderId: Long): OrderDTO {
@@ -185,7 +194,7 @@ class OrderServiceImpl( private val orderRepository: OrderRepository,
 
     override fun publishNotification( notificationRequestDTO: NotificationRequestDTO ){
 
-        val future: ListenableFuture<SendResult<String, NotificationRequestDTO>> = kafkaTemplateNotification.send("orderOrderSagaRequest", notificationRequestDTO)
+        val future: ListenableFuture<SendResult<String, NotificationRequestDTO>> = kafkaTemplateNotification.send("emailRequest", notificationRequestDTO)
         future.addCallback(object: ListenableFutureCallback<SendResult<String, NotificationRequestDTO>> {
             override fun onSuccess(result: SendResult<String, NotificationRequestDTO>?) {
                 println("Sent message notificationRequestDTO")
