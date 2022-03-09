@@ -1,5 +1,6 @@
 package it.polito.wa2.project.orderservice.controllers
 
+import it.polito.wa2.project.orderservice.exceptions.InvalidOperationException
 import it.polito.wa2.project.orderservice.exceptions.NotFoundException
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
@@ -16,5 +17,9 @@ class RestExceptionHandler: ResponseEntityExceptionHandler(){
     @ExceptionHandler(NotFoundException::class)
     protected fun handleNotFoundException(e: NotFoundException): ResponseEntity<String> =
         ResponseEntity(e.message, HttpStatus.NOT_FOUND)
+
+    @ExceptionHandler(InvalidOperationException::class)
+    protected fun handleInvalidOperationException(e: InvalidOperationException): ResponseEntity<String> =
+        ResponseEntity(e.message, HttpStatus.UNAUTHORIZED)
 
 }// RestExceptionHandler

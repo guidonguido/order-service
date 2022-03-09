@@ -85,10 +85,10 @@ class OrderController( val orderService: OrderService ){
         @PathVariable
         orderId: Long,
         @RequestBody
-        status: String
+        orderDTO: OrderDTO
     ): ResponseEntity<OrderDTO>{
-        val updatedOrderDTO = orderService.updateOrder(orderId, OrderStatus.fromString(status)
-            ?: throw NotFoundException("[OrderService Exception] Inserted value ${status} is not a valid OrderStatus"))
+        val updatedOrderDTO = orderService.updateOrder(orderId, OrderStatus.fromString(orderDTO.status.toString())
+            ?: throw NotFoundException("[OrderService Exception] Inserted value ${orderDTO.status.toString()} is not a valid OrderStatus"))
 
         /* TODO
          * Use NotificationService to send an email to ADMINs and USERs
@@ -106,19 +106,24 @@ class OrderController( val orderService: OrderService ){
 
         @RequestParam
         buyerId: Long? = null
-    ): ResponseEntity<OrderDTO> {
+    ): ResponseEntity<Any> {
 
         var deletedOrderDTO: OrderDTO? = null
 
-        buyerId?.let { deletedOrderDTO = orderService.deleteBuyerOrder(orderId, it)} ?:
-        kotlin.run { deletedOrderDTO = orderService.deleteOrder(orderId) }
+        try{
+            buyerId?.let { deletedOrderDTO = orderService.deleteBuyerOrder(orderId, it)} ?:
+            kotlin.run { deletedOrderDTO = orderService.deleteOrder(orderId) }
 
-        /* TODO
-         * Use NotificationService to send an email to ADMINs and USERs
-         * about the updated order status
-         */
+            /* TODO
+             * Use NotificationService to send an email to ADMINs and USERs
+             * about the updated order status
+             */
 
-        return ResponseEntity(deletedOrderDTO, HttpStatus.OK)
+            return ResponseEntity(deletedOrderDTO, HttpStatus.OK)
+        } catch(e: Exception){
+            return ResponseEntity(e.message, HttpStatus.UNAUTHORIZED)
+        }
+
     }
 
 

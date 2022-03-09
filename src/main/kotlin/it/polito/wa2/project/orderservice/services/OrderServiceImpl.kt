@@ -9,6 +9,7 @@ import it.polito.wa2.project.orderservice.dto.common.NotificationRequestDTO
 import it.polito.wa2.project.orderservice.dto.common.OrderRequestDTO
 import it.polito.wa2.project.orderservice.dto.common.toOrderRequestDTO
 import it.polito.wa2.project.orderservice.exceptions.ExistingRequestException
+import it.polito.wa2.project.orderservice.exceptions.InvalidOperationException
 import it.polito.wa2.project.orderservice.repositories.OrderRepository
 import it.polito.wa2.project.orderservice.exceptions.NotFoundException
 import it.polito.wa2.project.orderservice.repositories.coreography.OrderRequestRepository
@@ -87,9 +88,23 @@ class OrderServiceImpl( private val orderRepository: OrderRepository,
         val order = orderRepository.findById(orderId)
 
         if (order.isEmpty) throw NotFoundException("[OrderService Exception] Selected orderId does not exist, no deletion is possible")
-
+        if (order.get().status != OrderStatus.ISSUED) throw InvalidOperationException("[OrderService Exception] Selected order is in an advanced state, no deletion is possible")
         val deletedOrder = order.get()
         orderRepository.delete(deletedOrder)
+
+        publishNotification(NotificationRequestDTO(
+            messageObject = "Order CANCELED",
+            message = "Dear customer,\nOrder with id ${order.get().getId()} has been deleted as requested\n\n" +
+                    "Best Regards,\nAGTeam OrderService\n",
+            userId = order.get().buyerId
+        ))
+
+        publishNotification(NotificationRequestDTO(
+            messageObject = "Order CANCELED ADMIN INFO",
+            message = "Dear ADMIN,\nOrder with id ${order.get().getId()} has been deleted as requested by customer ${order.get().buyerId}\n\n" +
+                    "Best Regards,\nAGTeam OrderService\n",
+            userId = null
+        ))
 
         return deletedOrder.toOrderDTO()
     }
@@ -98,6 +113,7 @@ class OrderServiceImpl( private val orderRepository: OrderRepository,
         val order = orderRepository.findById(orderId)
 
         if (order.isEmpty) throw NotFoundException("[OrderService Exception] Selected orderId does not exist, no deletion is possible")
+        if (order.get().status != OrderStatus.ISSUED) throw InvalidOperationException("[OrderService Exception] Selected order is in an advanced state, no deletion is possible")
 
         val orderRequest = orderRequestRepository.findByUuid(uuid)
 
@@ -113,10 +129,25 @@ class OrderServiceImpl( private val orderRepository: OrderRepository,
         val order = orderRepository.findById(orderId)
 
         if (order.isEmpty) throw NotFoundException("[OrderService Exception] Selected orderId does not exist, no deletion is possible")
+        if (order.get().status != OrderStatus.ISSUED) throw InvalidOperationException("[OrderService Exception] Selected order is in an advanced state, no deletion is possible")
         if (order.get().buyerId != buyerId) throw NotFoundException("[OrderService Exception] Selected orderId does not belongs to selected buyer, no deletion is possible")
 
         val deletedOrder = order.get()
         orderRepository.delete(deletedOrder)
+
+        publishNotification(NotificationRequestDTO(
+            messageObject = "Order CANCELED",
+            message = "Dear customer,\nOrder with id ${order.get().getId()} has been deleted as requested\n\n" +
+                    "Best Regards,\nAGTeam OrderService\n",
+            userId = order.get().buyerId
+        ))
+
+        publishNotification(NotificationRequestDTO(
+            messageObject = "Order CANCELED ADMIN INFO",
+            message = "Dear ADMIN,\nOrder with id ${order.get().getId()} has been deleted as requested by customer ${order.get().buyerId}\n\n" +
+                    "Best Regards,\nAGTeam OrderService\n",
+            userId = null
+        ))
 
         return deletedOrder.toOrderDTO()
     }
