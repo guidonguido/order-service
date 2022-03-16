@@ -98,7 +98,9 @@ class OrderServiceImpl( private val orderRepository: OrderRepository,
         if (order.isEmpty) throw NotFoundException("[OrderService Exception] Selected orderId does not exist, no deletion is possible")
         if (order.get().status != OrderStatus.ISSUED) throw InvalidOperationException("[OrderService Exception] Selected order is in an advanced state, no deletion is possible")
         val deletedOrder = order.get()
-        orderRepository.delete(deletedOrder)
+        // orderRepository.delete(deletedOrder)
+        deletedOrder.status = OrderStatus.CANCELED
+        orderRepository.save(deletedOrder)
 
         publishNotification(NotificationRequestDTO(
             messageObject = "Order CANCELED",
@@ -129,8 +131,9 @@ class OrderServiceImpl( private val orderRepository: OrderRepository,
         else return
 
         val deletedOrder = order.get()
-        orderRepository.delete(deletedOrder)
-
+        // orderRepository.delete(deletedOrder)
+        deletedOrder.status = OrderStatus.CANCELED
+        orderRepository.save(deletedOrder)
     }
 
     override fun deleteBuyerOrder(orderId: Long, buyerId: Long): OrderDTO {
@@ -141,7 +144,9 @@ class OrderServiceImpl( private val orderRepository: OrderRepository,
         if (order.get().buyerId != buyerId) throw NotFoundException("[OrderService Exception] Selected orderId does not belongs to selected buyer, no deletion is possible")
 
         val deletedOrder = order.get()
-        orderRepository.delete(deletedOrder)
+        // orderRepository.delete(deletedOrder)
+        deletedOrder.status = OrderStatus.CANCELED
+        orderRepository.save(deletedOrder)
 
         publishNotification(NotificationRequestDTO(
             messageObject = "Order CANCELED",
