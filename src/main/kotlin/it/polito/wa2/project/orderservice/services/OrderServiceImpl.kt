@@ -40,6 +40,14 @@ class OrderServiceImpl( private val orderRepository: OrderRepository,
         return order.get().toOrderDTO()
     }
 
+    override fun getBuyerOrder(orderId: Long, buyerId: Long): OrderDTO {
+        val order = orderRepository.findByIdAndBuyerId(orderId, buyerId)
+
+        if (order.isEmpty) throw NotFoundException("[OrderService Exception] Selected orderId does not exist for the user")
+
+        return order.get().toOrderDTO()
+    }
+
     override fun getBuyerOrders(buyerId: Long): Set<OrderDTO> =
         orderRepository.findAllByBuyerId(buyerId).map{ it.toOrderDTO() }.toSet()
 

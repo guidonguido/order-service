@@ -2,6 +2,7 @@ package it.polito.wa2.project.orderservice.controllers
 
 import it.polito.wa2.project.orderservice.domain.OrderStatus
 import it.polito.wa2.project.orderservice.dto.OrderDTO
+import it.polito.wa2.project.orderservice.dto.PatchOrderDTO
 import it.polito.wa2.project.orderservice.dto.common.NotificationRequestDTO
 import it.polito.wa2.project.orderservice.exceptions.NotFoundException
 import it.polito.wa2.project.orderservice.services.OrderService
@@ -34,11 +35,18 @@ class OrderController( val orderService: OrderService ){
     @GetMapping("/{orderId}")
     fun getOrder(
         @PathVariable
-        orderId:Long
+        orderId:Long,
+
+        @RequestParam
+        buyerId: Long? = null
     ): ResponseEntity<OrderDTO>{
-        val orderDTO = orderService.getOrder(orderId)
+        var orderDTO: OrderDTO? = null
+
+        buyerId?.let { orderDTO = orderService.getBuyerOrder(orderId, it)} ?:
+        kotlin.run { orderDTO = orderService.getOrder(orderId) }
 
         return ResponseEntity(orderDTO, HttpStatus.OK)
+
     }
 
     @PostMapping()
@@ -85,7 +93,7 @@ class OrderController( val orderService: OrderService ){
         @PathVariable
         orderId: Long,
         @RequestBody
-        orderDTO: OrderDTO
+        orderDTO: PatchOrderDTO
     ): ResponseEntity<OrderDTO>{
         val updatedOrderDTO = orderService.updateOrder(orderId, OrderStatus.fromString(orderDTO.status.toString())
             ?: throw NotFoundException("[OrderService Exception] Inserted value ${orderDTO.status.toString()} is not a valid OrderStatus"))

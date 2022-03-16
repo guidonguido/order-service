@@ -11,6 +11,8 @@ interface OrderService {
 
     fun getOrder(orderId: Long): OrderDTO
 
+    fun getBuyerOrder(orderId: Long, buyerId: Long): OrderDTO
+
     fun getBuyerOrders(buyerId: Long): Set<OrderDTO>
 
     fun addOrder(order: OrderDTO): OrderDTO
