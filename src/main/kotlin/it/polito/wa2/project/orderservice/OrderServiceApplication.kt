@@ -2,6 +2,7 @@ package it.polito.wa2.project.orderservice
 
 import it.polito.wa2.project.orderservice.dto.OrderResponseDTO
 import it.polito.wa2.project.orderservice.dto.common.OrderRequestDTO
+import it.polito.wa2.project.orderservice.dto.common.TransactionReason
 import it.polito.wa2.project.orderservice.exceptions.ExistingRequestException
 import it.polito.wa2.project.orderservice.services.OrderService
 import org.springframework.boot.autoconfigure.SpringBootApplication

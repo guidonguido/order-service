@@ -1,10 +1,17 @@
 package it.polito.wa2.project.orderservice.configuration.debezium
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
 class DebeziumConfig {
+
+    @Value(value = "\${debezium.database.hostname}")
+    private val databaseHostname: String? = null
+
+    @Value(value = "\${debezium.database.port}")
+    private val databasePort: String? = null
 
     @Bean
     fun orderRequestConnector(): io.debezium.config.Configuration? {
@@ -15,8 +22,8 @@ class DebeziumConfig {
             .with("offset.flush.interval.ms", 60000)
             .with("name", "order-created-connector")
             //.with("database.server.name", studentDBHost.toString() + "-" + studentDBName)
-            .with("database.hostname", "localhost")
-            .with("database.port", "3304")
+            .with("database.hostname", databaseHostname)
+            .with("database.port", databasePort)
             .with("database.user", "root")
             .with("database.password", "root")
             .with("database.dbname", "orderservice")
